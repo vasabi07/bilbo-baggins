@@ -13,7 +13,7 @@ def web_search_agent(state: MessagesState):
     agent = create_react_agent(llm,tools=[tavily_search])
     return agent
     
-"""using tavily api as of now. must look the best option.
+"""using tavily api as of now. must look for the best option.
 consider giving prompt via state_modifier.
 
 """
