@@ -1,9 +1,17 @@
-def main():
-    print("Hello from bilbo-baggins!")
-
+from web_search_agent import web_search_agent
+from langgraph.graph import StateGraph,MessagesState,END
+from langchain_core.messages import HumanMessage,SystemMessage
+import pprint
+graph_builder = StateGraph(MessagesState)
+graph_builder.add_node("web_search_agent",web_search_agent)
+graph_builder.add_edge("web_search_agent",END)
+graph_builder.set_entry_point("web_search_agent")
+graph = graph_builder.compile()
 
 if __name__ == "__main__":
-    main()
+    response = graph.invoke({"messages": [HumanMessage(content="is dhoni the greatest captain?")]})
+    pprint.pprint(response["messages"][-1].content)
+    
 """make those 2 agents then create a main agent and then make them combined using command.
 create a machine control that decides the transfer and then try it out for 
 1. just websearch activity 
