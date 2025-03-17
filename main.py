@@ -1,9 +1,14 @@
 from web_search_agent import web_search_agent
+from report_generator_agent import report_generator_agent
 from langgraph.graph import StateGraph,MessagesState,END
 from langchain_core.messages import HumanMessage,SystemMessage
 import pprint
+
+"""start making the router nodes to navigate between websearch and report generation """
+
 graph_builder = StateGraph(MessagesState)
 graph_builder.add_node("web_search_agent",web_search_agent)
+graph_builder.add_node("report_generator_agent",report_generator_agent)
 graph_builder.add_edge("web_search_agent",END)
 graph_builder.set_entry_point("web_search_agent")
 graph = graph_builder.compile()
