@@ -29,7 +29,7 @@ def report_generator_agent(state: MessagesState):
 
     def research_node(state: ReportSchema) -> MessagesState:
         search_state = {"messages": [AIMessage(content=f"Search: {state['question']}")]}
-        search_result = web_search_agent(search_state).invoke(search_state)
+        search_result = web_search_agent(search_state)
         return {"messages": [HumanMessage(content=search_result["messages"][-1].content)]}
 
     def planner_node(state: MessagesState) -> PlannerSchema:
@@ -51,11 +51,11 @@ def report_generator_agent(state: MessagesState):
             system_prompt = f"""
             For the topic: {topic}, gather information on it. This is part of a big report. Your job is to work only on this topic.
             """
-            search_result = web_search_agent({"messages": [HumanMessage(content=system_prompt)]}).invoke({"messages": [HumanMessage(content=system_prompt)]})
+            search_result = web_search_agent({"messages": [HumanMessage(content=system_prompt)]})
             gathered_info.append(search_result["messages"][-1].content)
         return {"gathered_info": gathered_info}
 
-    def report_generation(state: ReportSchema) -> ReportSchema:
+    def report_generation(state: ReportSchema) -> MessagesState:
         system_prompt = f"""
         Generate an extensive report with the given info on the question {state['question']},
         make sure to include introduction, conclusion, and topics in between.
@@ -66,9 +66,9 @@ def report_generator_agent(state: MessagesState):
         report_response = llm.invoke([HumanMessage(content=full_prompt)])
         report_content = report_response.content
         # print(report_content)
-        return {"question": state["question"], "report": report_content}
+        return {"messages": [AIMessage(content=report_content)]}
 
-    graph_builder = StateGraph(input=MessagesState,output=ReportSchema)
+    graph_builder = StateGraph(MessagesState)
     graph_builder.add_node("question_node", question_node)
     graph_builder.add_node("research_node", research_node)
     graph_builder.add_node("planner_node", planner_node)
@@ -83,10 +83,10 @@ def report_generator_agent(state: MessagesState):
     graph_builder.set_entry_point("question_node")
 
     graph = graph_builder.compile()
-    
-    return graph
+    response = graph.invoke({"messages":[HumanMessage(content=state["messages"][-1].content)]})
+    return response
 
-if __name__ == "__main__":
-    response = report_generator_agent({"messages": [HumanMessage(content="what is AI engineering?")]}).invoke({"messages": [HumanMessage(content="what is AI engineering?")]})
-    pprint.pprint(response["report"])
+# if __name__ == "__main__":
+#     response = report_generator_agent({"messages": [HumanMessage(content="what is AI engineering?")]})
+#     pprint.pprint(response["report"])
     
