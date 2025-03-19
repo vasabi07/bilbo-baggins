@@ -9,6 +9,14 @@ import pprint
 
 load_dotenv()
 
+"""improvements required:
+                1. human in the loop to verify after planning stage and make changes
+                2. some kind of re-write loop, that checks if everything is written as per the plan.
+                3. make the research part parallel
+                4.add a seperate python_repl tool, so that it can create charts and graphs if it is necessary for the report.
+
+"""
+
 llm = ChatOpenAI(model="gpt-4o")
 
 class ReportSchema(TypedDict):
@@ -89,4 +97,3 @@ def report_generator_agent(state: MessagesState):
 # if __name__ == "__main__":
 #     response = report_generator_agent({"messages": [HumanMessage(content="what is AI engineering?")]})
 #     pprint.pprint(response["report"])
-    
