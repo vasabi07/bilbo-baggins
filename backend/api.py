@@ -1,16 +1,26 @@
 """create an api endpoint for the main graph to contact FE"""
-from fastapi import Fastapi  
+from fastapi import FastAPI 
 from fastapi.middleware.cors import CORSMiddleware
-
-app = Fastapi()
+from langgraph.graph import MessagesState
+from langchain_core.messages import HumanMessage
+from main import graph
+app = FastAPI()
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Allow all origins (Change this in production)
+    allow_origins=["*"],  
     allow_credentials=True,
-    allow_methods=["*"],  # Allow all methods (GET, POST, OPTIONS, etc.)
-    allow_headers=["*"],  # Allow all headers
+    allow_methods=["*"],  
+    allow_headers=["*"], 
 )
 
 
-# @app.post("/chat")
-# async def chat(request: )
+@app.post("/chat")
+async def chat(request: str):
+    
+    response =await graph.ainvoke({"messages": [HumanMessage(content=request)]})
+    print(response["messages"][-1].content)
+    return response
+
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run(app, port=8000)
