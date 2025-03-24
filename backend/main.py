@@ -73,7 +73,7 @@ graph_builder.set_entry_point("classifier")
 graph = graph_builder.compile()
 
 if __name__ == "__main__":
-    response = graph.invoke({"messages": [HumanMessage(content="write a report on interstellar movie ")]})
+    response = graph.invoke({"messages": [HumanMessage(content="when is the first match for csk in 2025?")]})
     print(response["messages"][-1].content)
     
 
