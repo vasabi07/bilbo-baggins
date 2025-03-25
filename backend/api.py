@@ -13,10 +13,8 @@ app.add_middleware(
     allow_headers=["*"], 
 )
 
-
 @app.post("/chat")
 async def chat(request: str):
-    
     response =await graph.ainvoke({"messages": [HumanMessage(content=request)]})
     print(response["messages"][-1].content)
     return response
