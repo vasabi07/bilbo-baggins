@@ -18,7 +18,7 @@ const ChatPage: React.FC = () => {
     setMessages([...messages, { sender: 'user', text: input }]);
 
     try {
-      const response = await axios.post('', { message: input });
+      const response = await axios.post('http://127.0.0.1:8000/chat', { message: input });
 
       setMessages((prevMessages) => [
         ...prevMessages,
@@ -41,7 +41,7 @@ const ChatPage: React.FC = () => {
         {messages.map((message, index) => (
           <div
             key={index}
-            className={`mb-2 p-2 rounded-lg ${
+            className={`mb-2 p-2 rounded-lg text-black ${
               message.sender === 'user' ? 'bg-blue-100 text-right' : 'bg-gray-100 text-left'
             }`}
           >
