@@ -1,17 +1,34 @@
 from web_search_agent import web_search_agent
 from report_generator_agent import report_generator_agent
-from langgraph.graph import StateGraph, MessagesState, END
-from langchain_core.messages import HumanMessage,AIMessage
-from langchain_openai import ChatOpenAI
+from langgraph.graph import StateGraph, END
 from typing import TypedDict
-import pprint
 from langgraph.types import Command
 from typing import Literal
+import openai
+from dotenv import load_dotenv
+load_dotenv()
+client = openai.OpenAI()
+def llm(prompt: str):
+    response = client.chat.completions.create(
+        model="gpt-4o",
+        messages=[{"role": "user", "content": prompt}],
+        temperature=0.7
+    )
+    return response.choices[0].message.content
 
 
+
+class Message(TypedDict):
+    type: str
+    content: str
+class MessagesState(TypedDict):
+    messages: list[Message]
 class RouterSchema(TypedDict):
     next_agent: str
-llm = ChatOpenAI(model="gpt-4o")
+
+
+
+
 
 def classifier(state: MessagesState) -> RouterSchema:
     question = state["messages"][-1].content
@@ -35,7 +52,7 @@ def classifier(state: MessagesState) -> RouterSchema:
     do not explain the resoning behind them. I strictly want only one of these three to be the response
     """
     
-    response = llm.invoke(system_prompt)
+    response = llm(system_prompt)
     content = response.content.lower()
 
     if "report generation" in content:
@@ -49,8 +66,8 @@ def classifier(state: MessagesState) -> RouterSchema:
     return {"next_agent": next_agent}
 def simple_node(state:MessagesState)->MessagesState:
     last_message = state["messages"][-1].content
-    response = llm.invoke(last_message)
-    return {"messages": [AIMessage(content=response.content)]}
+    response = llm(last_message)
+    return {"messages": [Message(type="AI",content=response.content)]}
     
 
 def router(state:RouterSchema)->Command[Literal["web_search_agent","report_generator_agent", "__end__"]]:
@@ -73,13 +90,9 @@ graph_builder.set_entry_point("classifier")
 graph = graph_builder.compile()
 
 if __name__ == "__main__":
-    response = graph.invoke({"messages": [HumanMessage(content="when is the first match for csk in 2025?")]})
-    print(response["messages"][-1].content)
+    # response = graph.invoke({"messages": [Message(type="HUMAN", content="when is the first match for csk in 2025?")]})
+    # print(response["messages"][-1].content)
+    response = llm("hello, i am vasanthan.")
+    print(response)
     
 
-"""make those 2 agents then create a main agent and then make them combined using command.
-create a machine control that decides the transfer and then try it out for 
-1. just websearch activity 
-2. ask the question together.
-3. add checkpointer and ask the question in couple of steps
-"""
