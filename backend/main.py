@@ -1,34 +1,12 @@
 from web_search_agent import web_search_agent
 from report_generator_agent import report_generator_agent
 from langgraph.graph import StateGraph, END
-from typing import TypedDict
 from langgraph.types import Command
 from typing import Literal
-import openai
+from utils.llm import llm
 from dotenv import load_dotenv
+from utils.types import Message,MessagesState,RouterSchema
 load_dotenv()
-client = openai.OpenAI()
-def llm(prompt: str):
-    response = client.chat.completions.create(
-        model="gpt-4o",
-        messages=[{"role": "user", "content": prompt}],
-        temperature=0.7
-    )
-    return response.choices[0].message.content
-
-
-
-class Message(TypedDict):
-    type: str
-    content: str
-class MessagesState(TypedDict):
-    messages: list[Message]
-class RouterSchema(TypedDict):
-    next_agent: str
-
-
-
-
 
 def classifier(state: MessagesState) -> RouterSchema:
     question = state["messages"][-1].content
