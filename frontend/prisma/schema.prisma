@@ -21,7 +21,7 @@ model User {
 }
 
 model Thread {
-  id String @id @default(cuid())
+  id String @id @default(uuid())
   userId String
   messages Message[]
   user User @relation(fields: [userId],references: [id])
@@ -37,3 +37,10 @@ enum MessageType {
   AI
   HUMAN
 }
+
+//in the api side of nextjs lets create routes for login. use clerk
+//save user details endpoint
+//create thread endpoint 
+//get messages endpoint
+//save messages endpoint 
+//create reports section.
