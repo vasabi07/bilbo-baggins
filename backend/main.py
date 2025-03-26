@@ -9,7 +9,7 @@ from utils.types import Message,MessagesState,RouterSchema
 load_dotenv()
 
 def classifier(state: MessagesState) -> RouterSchema:
-    question = state["messages"][-1].content
+    question = state["messages"][-1]["content"]
     system_prompt = f"""
     You are a professional classifier. You should read the question: "{question}" and classify it to whether it needs to go into "web search", 
     "report generation" or "neither".
@@ -43,7 +43,7 @@ def classifier(state: MessagesState) -> RouterSchema:
     
     return {"next_agent": next_agent}
 def simple_node(state:MessagesState)->MessagesState:
-    last_message = state["messages"][-1].content
+    last_message = state["messages"][-1]["content"]
     response = llm(last_message)
     return {"messages": [Message(type="AI",content=response.content)]}
     
@@ -68,9 +68,9 @@ graph_builder.set_entry_point("classifier")
 graph = graph_builder.compile()
 
 if __name__ == "__main__":
-    # response = graph.invoke({"messages": [Message(type="HUMAN", content="when is the first match for csk in 2025?")]})
-    # print(response["messages"][-1].content)
-    response = llm("hello, i am vasanthan.")
+    response = graph.invoke({"messages": [Message(type="HUMAN", content="write a report on adolesence, the new netflix series")]})
     print(response)
+    # response = llm("")
+    # print(response)
     
 
