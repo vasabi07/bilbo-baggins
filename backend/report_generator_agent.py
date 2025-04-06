@@ -4,9 +4,7 @@ from typing_extensions import NotRequired
 from utils.types import Message,MessagesState
 from utils.llm import llm
 from langgraph.graph import StateGraph, END, START
-from langchain_openai import ChatOpenAI
 from web_search_agent import web_search_agent
-import pprint
 
 load_dotenv()
 

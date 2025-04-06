@@ -30,6 +30,7 @@ model Message {
   id String @id @default(cuid())
   threadId String
   type MessageType
+  content String
   thread Thread @relation(fields: [threadId],references: [id])
 }
 
