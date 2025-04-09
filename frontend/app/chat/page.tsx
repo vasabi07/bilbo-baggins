@@ -1,6 +1,7 @@
 "use client"
 import React, { useState } from 'react';
 import axios from 'axios';
+import { threadId } from 'worker_threads';
 
 interface Message {
   sender: 'user' | 'bot';
@@ -18,7 +19,7 @@ const ChatPage: React.FC = () => {
     setMessages([...messages, { sender: 'user', text: input }]);
 
     try {
-      const response = await axios.post('http://127.0.0.1:8000/chat', { message: input });
+      const response = await axios.post('http://127.0.0.1:8000/chat', { message: input, threadId: "1" });
 
       setMessages((prevMessages) => [
         ...prevMessages,
