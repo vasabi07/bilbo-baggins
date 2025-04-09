@@ -1,7 +1,4 @@
-"""create an api endpoint for the main graph to contact FE,
-use checkpointer and connect to a DB may be something like redis for faster retrieval
 
-"""
 from fastapi import FastAPI 
 from fastapi.middleware.cors import CORSMiddleware
 from utils.types import Message
@@ -29,13 +26,13 @@ def create_thread_id() -> str:
 
 @app.post("/chat")
 async def chat(request: Request_type):
-    if request.threadId == "":
-        request.threadId = create_thread_id()
-    #must add threadId logic with checkpointer from langgraph 
-    response =await graph.ainvoke({"messages": [Message(type="Human",content=request.message)]})
-    print(response["messages"][-1].content)
-    reply = response["messages"][-1].content
-    return {"threadId":request.threadId,"reply": reply}
+    if request.get("threadId", "") == "":
+        request["threadId"] = create_thread_id()
+    config = {"configurable": {"thread_id": request["threadId"]}}
+    response =await graph.ainvoke({"messages": [Message(role="user",content=request["message"])]},config=config)
+    print(response["messages"])
+    reply = response["messages"][-1]["content"]
+    return {"threadId":request["threadId"],"reply": reply}
 
 if __name__ == "__main__":
     import uvicorn

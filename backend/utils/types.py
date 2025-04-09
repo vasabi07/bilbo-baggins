@@ -1,8 +1,9 @@
-from typing import TypedDict
+from typing import TypedDict, Annotated
+from langgraph.graph.message import add_messages
 
 
 class Message(TypedDict):
-    type: str
+    role: str
     content: str
 class MessagesState(TypedDict):
     messages: list[Message]
