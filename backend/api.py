@@ -6,7 +6,7 @@ from typing import TypedDict
 from typing_extensions import NotRequired
 import uuid 
 from main import graph
-
+from redis_store import conversation_store
 
 app = FastAPI()
 app.add_middleware(
@@ -28,9 +28,14 @@ def create_thread_id() -> str:
 async def chat(request: Request_type):
     if request.get("threadId", "") == "":
         request["threadId"] = create_thread_id()
-    config = {"configurable": {"thread_id": request["threadId"]}}
-    response =await graph.ainvoke({"messages": [Message(role="user",content=request["message"])]},config=config)
-    print(response["messages"])
+    # config = {"configurable": {"thread_id": request["threadId"]}}
+    print(request["threadId"])
+    previous_state = conversation_store.get_history(request["threadId"])
+    previous_state["messages"].append(Message(role="user",content=request["message"]))
+    print(f"input to the agent: {previous_state}")
+    response =await graph.ainvoke(previous_state)
+    conversation_store.save_history(request["threadId"], response)
+    print(f"output from the agent: {response}")
     reply = response["messages"][-1]["content"]
     return {"threadId":request["threadId"],"reply": reply}
 

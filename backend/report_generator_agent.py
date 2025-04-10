@@ -35,9 +35,9 @@ def report_generator_agent(state: MessagesState):
         return {"question": question_text}
 
     def research_node(state: ReportSchema) -> MessagesState:
-        search_state = {"messages": [Message(type="AI",content=f"Search: {state['question']}")]}
+        search_state = {"messages": [Message(role="AI",content=f"Search: {state['question']}")]}
         search_result = web_search_agent(search_state)
-        return {"messages": [Message(type="Human",content=search_result["messages"][-1]["content"])]}
+        return {"messages": [Message(role="user",content=search_result["messages"][-1]["content"])]}
 
     def planner_node(state: MessagesState) -> PlannerSchema:
         search_results = state["messages"][-1]["content"]
@@ -58,7 +58,7 @@ def report_generator_agent(state: MessagesState):
             system_prompt = f"""
             For the topic: {topic}, gather information on it. This is part of a big report. Your job is to work only on this topic.
             """
-            search_result = web_search_agent({"messages": [Message(type="Human",content=system_prompt)]})
+            search_result = web_search_agent({"messages": [Message(role="user",content=system_prompt)]})
             gathered_info.append(search_result["messages"][-1]["content"])
         return {"gathered_info": gathered_info}
 
@@ -72,7 +72,7 @@ def report_generator_agent(state: MessagesState):
         full_prompt = system_prompt + "\n\n" + gathered_info_str
         report_response = llm(full_prompt)
         report_content = report_response.content
-        return {"messages": [Message(type="AI",content=report_content)]}
+        return {"messages": [Message(role="AI",content=report_content)]}
 
     graph_builder = StateGraph(MessagesState)
     graph_builder.add_node("question_node", question_node)
@@ -89,9 +89,9 @@ def report_generator_agent(state: MessagesState):
     graph_builder.set_entry_point("question_node")
 
     graph = graph_builder.compile()
-    response = graph.invoke({"messages":[Message(type="Human",content=state["messages"][-1]["content"])]})
+    response = graph.invoke({"messages":[Message(role="user",content=state["messages"][-1]["content"])]})
     return response
 
 # if __name__ == "__main__":
-#     response = report_generator_agent({"messages": [Message(type="Human",content="what is AI engineering?")]})
+#     response = report_generator_agent({"messages": [Message(role="user",content="what is AI engineering?")]})
 #     pprint.pprint(response)

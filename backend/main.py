@@ -6,7 +6,6 @@ from typing import Literal
 from utils.llm import llm
 from dotenv import load_dotenv
 from utils.types import Message, MessagesState, RouterSchema
-from langgraph.checkpoint.memory import MemorySaver
 
 load_dotenv()
 
@@ -45,11 +44,11 @@ def classifier(state: MessagesState) -> RouterSchema:
 
 def simple_node(state: MessagesState) -> MessagesState:
     
-    last_message = state["messages"][-1]["content"]
+    # last_message = state["messages"][-1]["content"]
     response = llm(state["messages"])
-    state["messages"].append(Message(role="AI", content=response.content))
-    print(state)
-    return {"messages": [Message(role="AI", content=response.content)]}
+    state["messages"].append(Message(role="assistant", content=response.content))
+    # print(state)
+    return state
     
 def router(state: RouterSchema) -> Command[Literal["web_search_agent", "report_generator_agent", "__end__"]]:
     goto = state["next_agent"]
@@ -68,16 +67,16 @@ graph_builder.add_edge("web_search_agent", END)
 graph_builder.add_edge("report_generator_agent", END)
 graph_builder.add_edge("simple_node", END)
 graph_builder.set_entry_point("classifier")
-graph = graph_builder.compile(checkpointer=MemorySaver())
+graph = graph_builder.compile()
 
-if __name__ == "__main__":
-    response = graph.invoke(
-        {"messages": [Message(type="HUMAN", content="hi, I am vasanth")]},
-        config={"configurable": {"thread_id": 1}}
-    )
-    print(response)
-    response2 = graph.invoke(
-        {"messages": [Message(type="HUMAN", content="what is my name")]},
-        config={"configurable": {"thread_id": 1}}
-    )
-    print(response2)
+# if __name__ == "__main__":
+#     response = graph.invoke(
+#         {"messages": [Message(role="user", content="hi, I am vasanth")]},
+#         config={"configurable": {"thread_id": 1}}
+#     )
+#     print(response)
+#     response2 = graph.invoke(
+#         {"messages": [Message(role="user", content="what is my name")]},
+#         config={"configurable": {"thread_id": 1}}
+#     )
+#     print(response2)

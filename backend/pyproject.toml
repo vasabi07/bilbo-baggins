@@ -13,6 +13,7 @@ langchain-community = "^0.3.20"
 langchain-openai = "^0.3.9"
 uvicorn = "^0.34.0"
 openai = "^1.68.2"
+redis = "^5.2.1"
 
 
 [build-system]

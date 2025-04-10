@@ -19,7 +19,7 @@ const ChatPage: React.FC = () => {
     setMessages([...messages, { sender: 'user', text: input }]);
 
     try {
-      const response = await axios.post('http://127.0.0.1:8000/chat', { message: input, threadId: "1" });
+      const response = await axios.post('http://127.0.0.1:8000/chat', { message: input, threadId: "2" });
 
       setMessages((prevMessages) => [
         ...prevMessages,
