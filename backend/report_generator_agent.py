@@ -8,16 +8,6 @@ from web_search_agent import web_search_agent
 
 load_dotenv()
 
-"""improvements required:
-                1. human in the loop to verify after planning stage and make changes
-                2. some kind of re-write loop, that checks if everything is written as per the plan.
-                3. make the research part parallel
-                4.add a seperate python_repl tool, so that it can create charts and graphs if it is necessary for the report.
-
-"""
-
-
-
 class ReportSchema(TypedDict):
     question: str
     report: NotRequired[str]
@@ -35,7 +25,7 @@ def report_generator_agent(state: MessagesState):
         return {"question": question_text}
 
     def research_node(state: ReportSchema) -> MessagesState:
-        search_state = {"messages": [Message(role="AI",content=f"Search: {state['question']}")]}
+        search_state = {"messages": [Message(role="assistant",content=f"Search: {state['question']}")]}
         search_result = web_search_agent(search_state)
         return {"messages": [Message(role="user",content=search_result["messages"][-1]["content"])]}
 
@@ -47,7 +37,9 @@ def report_generator_agent(state: MessagesState):
         Identify and list the key topics that need further research.
         Output a structured list of research topics.
         """
-        topics_response = llm(system_prompt)
+        input_state = {"messages": [Message(role="system",content=system_prompt)]}
+        topics_response = llm(input_state["messages"])
+        print(f"planner_node_allm: {topics_response}")
         topics = [topic.strip() for topic in topics_response.content.split(",")]
         return {"topics": topics}
 
@@ -70,9 +62,10 @@ def report_generator_agent(state: MessagesState):
         """
         gathered_info_str = "\n".join(state["gathered_info"])
         full_prompt = system_prompt + "\n\n" + gathered_info_str
-        report_response = llm(full_prompt)
+
+        report_response = llm([Message(role="system",content=full_prompt)])
         report_content = report_response.content
-        return {"messages": [Message(role="AI",content=report_content)]}
+        return {"messages": [Message(role="assistant",content=report_content)]}
 
     graph_builder = StateGraph(MessagesState)
     graph_builder.add_node("question_node", question_node)
@@ -90,6 +83,8 @@ def report_generator_agent(state: MessagesState):
 
     graph = graph_builder.compile()
     response = graph.invoke({"messages":[Message(role="user",content=state["messages"][-1]["content"])]})
+    report = response["messages"][-1]["content"]
+    state["messages"].append(Message(role="assistant",content=report))
     return response
 
 # if __name__ == "__main__":

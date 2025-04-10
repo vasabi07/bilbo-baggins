@@ -65,7 +65,7 @@ def web_search_agent(state: AgentState):
         # Return a new state with the agent's final message appended
         # state["messages"].append(Message(role="AI", content=response_text))
         new_state = {
-        "messages": state["messages"] + [Message(role="AI", content=response_text)],
+        "messages": state["messages"] + [Message(role="assistant", content=response_text)],
         "tool_results": state.get("tool_results", ""),
         "query": state["query"],
         "next_step": state["next_step"]
